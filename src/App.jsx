@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, NavLink } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Home, ShoppingCart, HelpCircle, Settings } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Home, ShoppingCart, HelpCircle, Settings, Menu, X } from 'lucide-react';
 import HomePage from '@/pages/HomePage';
 import ShopPage from '@/pages/ShopPage';
 import SupportPage from '@/pages/SupportPage';
@@ -18,6 +18,12 @@ const LOGO_PATH = "/images/logo.png";
 // import logoImage from './assets/logo.png';
 
 const App = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
   const navLinkClasses = ({ isActive }) =>
     `flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 ease-in-out
     ${isActive
@@ -25,8 +31,20 @@ const App = () => {
       : 'text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground hover:scale-105'
     }`;
 
+  const mobileNavLinkClasses = ({ isActive }) =>
+    `flex items-center w-full px-4 py-4 text-base font-medium rounded-lg transition-all duration-300 ease-in-out
+    ${isActive
+      ? 'bg-primary text-primary-foreground shadow-lg'
+      : 'text-foreground hover:bg-secondary/80 hover:text-secondary-foreground'
+    }`;
+
   const iconProps = {
     size: 20,
+    className: "mr-3"
+  };
+
+  const mobileIconProps = {
+    size: 22,
     className: "mr-3"
   };
 
@@ -47,18 +65,65 @@ const App = () => {
                 </div>
               </Link>
               
+              {/* Navegación para pantallas medianas y grandes */}
               <nav className="hidden md:flex items-center space-x-2">
                 <NavLink to="/" className={navLinkClasses}><Home {...iconProps} /> Inicio</NavLink>
                 <NavLink to="/shop" className={navLinkClasses}><ShoppingCart {...iconProps} /> Comprar</NavLink>
                 <NavLink to="/support" className={navLinkClasses}><HelpCircle {...iconProps} /> Soporte</NavLink>
               </nav>
-              <div className="flex items-center space-x-2">
-                {/* Recuadro de búsqueda eliminado */}
-                <Button variant="ghost" size="icon" className="md:hidden">
-                  <Settings className="h-5 w-5" />
+
+              {/* Botón menú hamburguesa para móviles */}
+              <div className="flex items-center">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="md:hidden"
+                  onClick={toggleMobileMenu}
+                >
+                  {mobileMenuOpen ? 
+                    <X className="h-6 w-6 text-primary" /> : 
+                    <Menu className="h-6 w-6" />
+                  }
                 </Button>
               </div>
             </div>
+
+            {/* Menú móvil desplegable */}
+            <AnimatePresence>
+              {mobileMenuOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+                >
+                  <nav className="flex flex-col space-y-1 p-4">
+                    <NavLink 
+                      to="/" 
+                      className={mobileNavLinkClasses}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Home {...mobileIconProps} /> Inicio
+                    </NavLink>
+                    <NavLink 
+                      to="/shop" 
+                      className={mobileNavLinkClasses}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <ShoppingCart {...mobileIconProps} /> Comprar
+                    </NavLink>
+                    <NavLink 
+                      to="/support" 
+                      className={mobileNavLinkClasses}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <HelpCircle {...mobileIconProps} /> Soporte
+                    </NavLink>
+                  </nav>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </header>
 
           <main className="flex-grow container mx-auto px-4 py-8">
